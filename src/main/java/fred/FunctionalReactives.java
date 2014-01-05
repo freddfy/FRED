@@ -12,37 +12,38 @@ import java.util.Queue;
 
 /**
  * Main class for composing functional reactives.
- *
+ * <pre>
  * Usage Example:
- * <code>
- *  FunctionalReactives.from(1, 2, 3, 4, 5)
- *       .filter(new Predicate<Integer>() {
- *          @Override
- *          public boolean apply(Integer input) {
+ * {@code
+ * FunctionalReactives.from(1, 2, 3, 4, 5)
+ *      .filter(new Predicate<Integer>() {
+ *
+ *          @Override public boolean apply(Integer input) {
  *              return input % 2 == 1;
  *          }
  *      })
- *       .map(new Function<Integer, Optional<String>>() {
- *          @Override
- *          public Optional<String> apply(Integer input) {
- *              return Optional.of(input.toString());
- *          }
- *      })
- *       .reduce(new FunctionAcc<String, String>() {
- *          @Override
- *          public Optional<String> apply(String acc, String next) {
+ *      .reduce(new FunctionAcc<Integer, Integer>() {
+ *          @Override public Optional<Integer> apply(Integer acc, Integer next) {
  *              return Optional.of(acc + next);
  *          }
  *      })
- *       .forEach(new FunctionVoid<Object>() {
- *          @Override
- *          public void apply(Object input) {
+ *      .map(new Function<Integer, Optional<String>>() {
+ *          @Override public Optional<String> apply(Integer input) {
+ *              return Optional.of(input.toString());
+ *          }
+ *      })
+ *      .forEach(new FunctionVoid<Object>() {
+ *          @Override public void apply(Object input) {
  *              System.out.println(input);
  *          }
  *      })
- *       .start();
- * </code>
+ *      .start();
+ *      //Output: (result of 1+3 and 1+3+9 in String)
+ *      //4
+ *      //9
  *
+ * }
+ * </pre>
  * Author:  Fred Deng
  */
 public class FunctionalReactives<T> implements LifeCycle {
