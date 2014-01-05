@@ -31,7 +31,7 @@ Functional Reactive Event Driver - a lightweight library aims to facilitate Func
                     }
                 })
                 .start();
-                //Output: (result of 1+3 and 1+3+9 in String)
+                //Output: (result of 1+3 and 1+3+5 in String)
                 //4
                 //9
 
