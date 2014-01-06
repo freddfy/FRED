@@ -4,8 +4,10 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
+import fred.frp.Function2;
 import fred.frp.FunctionAcc;
 import fred.frp.FunctionVoid;
+import fred.sub.SubscribableIterable;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -141,6 +143,54 @@ public class FunctionalReactivesTest {
         subject.shutdown();
 
         verify.assertResult(6, 12);
+    }
+
+    @Test
+    public void testZipEitherWithTheSameEventManagerFromDifferentSources() throws Exception {
+        Verify<String> verify = new Verify<String>();
+
+        FunctionalReactives<Integer> fr1 = FunctionalReactives.from(4, 5);  //4 is ignored since it is sync event manager
+        FunctionalReactives<Integer> fr2 = fr1.from(new SubscribableIterable<Integer>(5, 3, 2, 1));
+
+        fr1.zipEither(fr2, new Function2<Integer, Integer, String>() {
+            @Override
+            public Optional<String> apply(Integer input1, Integer input2) {
+                return Optional.of(input1.toString() + input2.toString());
+            }
+        })
+                .forEach(verify)
+                .start();
+
+        fr1.shutdown();
+
+        verify.assertResult("55", "53", "52", "51");
+    }
+
+    @Test
+    public void testZipEitherWithTheSameEventManagerFromTheSameSource() throws Exception {
+        Verify<String> verify = new Verify<String>();
+
+        FunctionalReactives<Integer> fr1 = FunctionalReactives.from(5, 4, 3, 2, 1);
+        FunctionalReactives<Integer> fr2 = fr1.filter(new Predicate<Integer>() {
+            @Override
+            public boolean apply(Integer input) {
+                return input % 2 == 1;
+            }
+        });
+
+        fr1.zipEither(fr2, new Function2<Integer, Integer, String>() {
+            @Override
+            public Optional<String> apply(Integer input1, Integer input2) {
+                return Optional.of(input1.toString() + input2.toString());
+            }
+        })
+                .forEach(verify)
+                .start();
+
+        fr1.shutdown();
+
+        verify.assertResult("55", "45", "33", "23", "11");
+
     }
 
     private static class Verify<T> implements FunctionVoid<T> {

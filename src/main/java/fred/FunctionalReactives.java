@@ -102,6 +102,12 @@ public class FunctionalReactives<T> implements LifeCycle {
         return new FunctionalReactives<T1>(em, next);
     }
 
+    private <T0, T1> FunctionalReactives<T1> chain(FunctionalReactives<T0> another, ReactFunc<T1> reactFunc) {
+        FunctionalReactives<T1> next = chain(reactFunc);
+        em.connect(another.currReact, next.currReact);
+        return next;
+    }
+
     public <T1> FunctionalReactives<T1> map(Function<? super T, Optional<T1>> function) {
         return chain(new ReactFuncMap<T, T1>(currReact, function));
     }
@@ -120,6 +126,11 @@ public class FunctionalReactives<T> implements LifeCycle {
 
     public <T1> FunctionalReactives<T1> flatMap(Function<? super T, Optional<Queue<T1>>> function) {
         return chain(new ReactFuncFlatMap<T, T1>(em, currReact, function));
+    }
+
+    //TODO: to support different event manager
+    public <T0, T1> FunctionalReactives<T1> zipEither(FunctionalReactives<T0> another, Function2<? super T, ? super T0, T1> function) {
+        return chain(another, new ReactFuncZipEither<T, T0, T1>(currReact, another.currReact, function));
     }
 
     @Override
