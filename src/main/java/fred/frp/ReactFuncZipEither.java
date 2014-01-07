@@ -5,7 +5,7 @@ import fred.event.EventReact;
 import fred.util.Optionals;
 
 /**
- * Apply function when either input is fired.
+ * Apply function when either input is fired, last fired value will be used when that side is not fired.
  *
  * Author: Fred Deng
  */

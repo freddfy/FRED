@@ -193,6 +193,54 @@ public class FunctionalReactivesTest {
 
     }
 
+    @Test
+    public void testZipStrictWithTheSameEventManagerFromDifferentSources() throws Exception {
+        Verify<String> verify = new Verify<String>();
+
+        FunctionalReactives<Integer> fr1 = FunctionalReactives.from(4, 5);
+        FunctionalReactives<Integer> fr2 = fr1.from(new SubscribableIterable<Integer>(5, 3, 2, 1));
+
+        fr1.zipStrict(fr2, new Function2<Integer, Integer, String>() {
+            @Override
+            public Optional<String> apply(Integer input1, Integer input2) {
+                return Optional.of(input1.toString() + input2.toString());
+            }
+        })
+                .forEach(verify)
+                .start();
+
+        fr1.shutdown();
+
+        verify.assertResult("45", "53");
+    }
+
+    @Test
+    public void testZipStrictWithTheSameEventManagerFromTheSameSource() throws Exception {
+        Verify<String> verify = new Verify<String>();
+
+        FunctionalReactives<Integer> fr1 = FunctionalReactives.from(5, 4, 3, 2, 1);
+        FunctionalReactives<Integer> fr2 = fr1.filter(new Predicate<Integer>() {
+            @Override
+            public boolean apply(Integer input) {
+                return input % 2 == 1;
+            }
+        });
+
+        fr1.zipStrict(fr2, new Function2<Integer, Integer, String>() {
+            @Override
+            public Optional<String> apply(Integer input1, Integer input2) {
+                return Optional.of(input1.toString() + input2.toString());
+            }
+        })
+                .forEach(verify)
+                .start();
+
+        fr1.shutdown();
+
+        verify.assertResult("55", "43", "31");
+
+    }
+
     private static class Verify<T> implements FunctionVoid<T> {
         private List<T> results = Lists.newArrayList();
 

@@ -128,9 +128,26 @@ public class FunctionalReactives<T> implements LifeCycle {
         return chain(new ReactFuncFlatMap<T, T1>(em, currReact, function));
     }
 
-    //TODO: to support different event manager
+    /**
+     * Apply the function when either input has fired, will use the last fired value from the other side if only one side
+     * was fired.
+     */
     public <T0, T1> FunctionalReactives<T1> zipEither(FunctionalReactives<T0> another, Function2<? super T, ? super T0, T1> function) {
+        if (another.em != this.em) { //TODO: to support different event manager
+            throw new UnsupportedOperationException("Not yet support zipping from different event manager");
+        }
         return chain(another, new ReactFuncZipEither<T, T0, T1>(currReact, another.currReact, function));
+    }
+
+    /**
+     * Apply the function when both input has fired, might queue up the fired input if only one side is fired,
+     * which is like "zipping strictly" two stream of inputs.
+     */
+    public <T0, T1> FunctionalReactives<T1> zipStrict(FunctionalReactives<T0> another, Function2<? super T, ? super T0, T1> function) {
+        if (another.em != this.em) { //TODO: to support different event manager
+            throw new UnsupportedOperationException("Not yet support zipping from different event manager");
+        }
+        return chain(another, new ReactFuncZipStrict<T, T0, T1>(currReact, another.currReact, function, em));
     }
 
     @Override
