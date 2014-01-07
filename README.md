@@ -1,7 +1,7 @@
 FRED
 ====
 
-Functional Reactive Event Driver - a lightweight library aims to facilitate Functional Reactive Programming in Java.
+Functional Reactive Event Driver - a lightweight library aims to facilitate developing event-driven system by Functional Reactive Programming in Java.
 
 ### Usage Example:
 ``` java
