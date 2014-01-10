@@ -1,5 +1,6 @@
 package fred.event;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 
 import java.util.Set;
@@ -79,7 +80,7 @@ public class EventManagerLifeCycle extends EventManagerDecorator {
                 candidate.start();
                 started.add(candidate);
             } catch (Exception ex) { //so that failure in one candidate.start() won't affect other toStart
-                ex.printStackTrace(); //TODO: add logging
+                Throwables.propagate(ex); //TODO: properly logged
             }
         }
 
@@ -92,7 +93,7 @@ public class EventManagerLifeCycle extends EventManagerDecorator {
             try {
                 candidate.shutdown();
             } catch (Exception ex) { //so that failure in any one candidate.shutdown() won't affect others
-                ex.printStackTrace(); //TODO: add logging
+                Throwables.propagate(ex); //TODO: properly logged
             }
         }
 
