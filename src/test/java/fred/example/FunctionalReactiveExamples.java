@@ -25,7 +25,7 @@ import static fred.frp.FunctionVoids.println;
 public class FunctionalReactiveExamples {
 
     /**
-     * This example demonstrate the fluent API for chaining reactions.
+     * This example demonstrate the fluent API for chaining reactions by a facade class FunctionalReactives.
      * <p/>
      * The higher order function namings are similar to those in Scala.
      */
@@ -63,41 +63,14 @@ public class FunctionalReactiveExamples {
 
     /**
      * This example demonstrate how FunctionalReactives could be used to source from another customised source even
-     * it schedule events from a different thread as mostly sources do.
+     * it schedule events from a different thread as mostly asynch sources do.
      */
     @Test
     public void testEventSourcingFromAsynchronousSubscribable() throws Exception {
-        FunctionalReactives fr = FunctionalReactives.createAsync( //assume source happens in a different thread
-
-                //For more complex sourcing, a Subscribable needs to be implemented
-                //The example subscribable here is only a simple one that will
-                //schedule 1 ~ 5 to the reactives
-                new Subscribable<Integer>() {
-                    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-                    private Future<?> future;
-
-                    @Override
-                    public void doSubscribe(final Schedulable<? super Integer> source) {
-                        future = executor.submit(new Runnable() {
-                            @Override
-                            public void run() { //produce integers in a different thread
-                                for (int i = 1; i < 6; i++) {
-                                    source.schedule(i);
-                                }
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void unsubscribe() { //unsubscribe from the source
-                        try {
-                            assert future != null;
-                            future.get(5, TimeUnit.SECONDS); //wait for all the scheduled values fired
-                        } catch (Exception e) {
-                            Throwables.propagate(e); //just hide the checked exception
-                        }
-                    }
-                })
+        FunctionalReactives fr =
+                FunctionalReactives.createAsync( //assume source happens in a different thread
+                    aSubscribableWillScheduleIntegerOneToFive() //a subscribable implementation
+                )
                 .filter(new Predicate<Integer>() {
                     @Override
                     public boolean apply(Integer input) {
@@ -114,5 +87,37 @@ public class FunctionalReactiveExamples {
         // Filter events:            ---> 2 ------> 4 ------> |
         // Print out results:        -> "2\n" ---> "4\n" ---> |
 
+    }
+
+    private Subscribable<Integer> aSubscribableWillScheduleIntegerOneToFive() {
+        //For more complex sourcing, a Subscribable needs to be implemented
+        //The example subscribable here is only a simple one that will
+        //schedule 1 ~ 5 to the reactives
+        return new Subscribable<Integer>() {
+            private final ExecutorService executor = Executors.newSingleThreadExecutor();
+            private Future<?> future;
+
+            @Override
+            public void doSubscribe(final Schedulable<? super Integer> source) {
+                future = executor.submit(new Runnable() {
+                    @Override
+                    public void run() { //produce integers in a different thread
+                        for (int i = 1; i < 6; i++) {
+                            source.schedule(i); //schedule integer 1 to 5 to the callback source
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void unsubscribe() { //unsubscribe from the source
+                try {
+                    assert future != null;
+                    future.get(5, TimeUnit.SECONDS); //wait for all the scheduled values fired
+                } catch (Exception e) {
+                    Throwables.propagate(e); //just hide the checked exception
+                }
+            }
+        };
     }
 }
