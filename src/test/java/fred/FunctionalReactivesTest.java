@@ -3,6 +3,7 @@ package fred;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import fred.frp.Function2;
 import fred.frp.FunctionAcc;
@@ -196,6 +197,16 @@ public class FunctionalReactivesTest {
                     }
                 })
         ).hasFired("55", "43", "31");
+
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testBufferBySize() throws Exception {
+        assertReactive(subject.bufferBySize(2))
+                .hasFired(ImmutableList.of(1, 2),
+                        ImmutableList.of(3, 4)
+                );
 
     }
 }

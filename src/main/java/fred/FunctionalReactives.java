@@ -8,6 +8,7 @@ import fred.frp.*;
 import fred.sub.Subscribable;
 import fred.sub.SubscribableIterable;
 
+import java.util.List;
 import java.util.Queue;
 
 /**
@@ -148,6 +149,10 @@ public class FunctionalReactives<T> implements LifeCycle {
             throw new UnsupportedOperationException("Not yet support zipping from different event manager");
         }
         return chain(another, new ReactFuncZipStrict<T, T0, T1>(currReact, another.currReact, function, em));
+    }
+
+    public FunctionalReactives<List<T>> bufferBySize(int size) {
+        return chain(new ReactFuncBuffer<T>(em, currReact, size));
     }
 
     @Override
