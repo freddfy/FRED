@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class Assert<T> implements FunctionVoid<T> {
     private final FunctionalReactives<T> verifiable;
-    private final List<T> results = Lists.newArrayList();
+    private final List<T> results = Lists.newCopyOnWriteArrayList();
 
     public static <T> Assert<T> assertReactive(FunctionalReactives<T> verifiable){
         return new Assert<T>(verifiable);

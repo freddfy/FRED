@@ -7,9 +7,11 @@ import fred.event.*;
 import fred.frp.*;
 import fred.sub.Subscribable;
 import fred.sub.SubscribableIterable;
+import fred.sub.SubscribableTimer;
 
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Main class for composing functional reactives.
@@ -153,6 +155,39 @@ public class FunctionalReactives<T> implements LifeCycle {
 
     public FunctionalReactives<List<T>> bufferBySize(int size) {
         return chain(new ReactFuncBuffer<T>(em, currReact, size));
+    }
+
+    /**
+     * Create a timer source out of the same event manager which fire after the initial delay per period of timeUnit
+     */
+    public FunctionalReactives<Boolean> timerSource(long delay, long period, TimeUnit timeUnit){
+        if (isSync(em)) {
+            throw new UnsupportedOperationException("Timer source not thread safe with sync event manager");
+        }
+
+        return from(new SubscribableTimer(delay, period, timeUnit));
+    }
+
+    /**
+     * Create a buffer reactive which flush per period of time unit with the initial delay
+     *
+     * Be careful the buffer memory consumption here will be allowed to grow without limit within each period.
+     */
+    public FunctionalReactives<List<T>> bufferByTime(long delay, long period, TimeUnit timeUnit) {
+        return bufferByFlush(timerSource(delay, period, timeUnit));
+    }
+
+    /**
+     * Create a buffer reactive which flush when the flush source reacted.
+     *
+     * Be careful the buffer memory consumption here will be allowed to grow without limit between flushes.
+     */
+    public FunctionalReactives<List<T>> bufferByFlush(FunctionalReactives<?> flushSource) {
+        return chain(flushSource, new ReactFuncBuffer<T>(em, currReact, flushSource.currReact));
+    }
+
+    private boolean isSync(EventManager em) {
+        return em instanceof EventManagerSync || em instanceof EventManagerCore;
     }
 
     @Override

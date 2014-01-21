@@ -81,4 +81,32 @@ public class ReactFuncBufferTest {
         assertThat(subject.apply()).isAbsent(); //will not flush if there's no item in buffer
         assertThat(subject.apply()).contains(ImmutableList.of("2"));
     }
+
+    @Test
+    public void testBufferBySizeOnly() throws Exception {
+        subject = new ReactFuncBuffer<String>(em, source, 2);
+        when(source.value()).thenReturn(of("1")).thenReturn(of("2")).thenReturn(of("3")).thenReturn(of("4"));
+        when(em.isFired(source)).thenReturn(true).thenReturn(false).thenReturn(true).thenReturn(true).thenReturn(true);
+
+        assertThat(subject.apply()).isAbsent();
+        assertThat(subject.apply()).isAbsent();
+        assertThat(subject.apply()).contains(ImmutableList.of("1", "2"));
+        assertThat(subject.apply()).isAbsent();
+        assertThat(subject.apply()).contains(ImmutableList.of("3", "4"));
+    }
+
+    @Test
+    public void testBufferByFlushSourceOnly() throws Exception {
+        subject = new ReactFuncBuffer<String>(em, source, flush);
+        when(source.value()).thenReturn(of("1")).thenReturn(of("2")).thenReturn(of("3")).thenReturn(of("4"));
+        when(em.isFired(source)).thenReturn(true).thenReturn(false).thenReturn(true).thenReturn(true).thenReturn(true);
+        when(em.isFired(flush)).thenReturn(false).thenReturn(true).thenReturn(false).thenReturn(false).thenReturn(true);
+
+        assertThat(subject.apply()).isAbsent();
+        assertThat(subject.apply()).contains(ImmutableList.of("1"));
+        assertThat(subject.apply()).isAbsent();
+        assertThat(subject.apply()).isAbsent();
+        assertThat(subject.apply()).contains(ImmutableList.of("2", "3", "4"));
+
+    }
 }

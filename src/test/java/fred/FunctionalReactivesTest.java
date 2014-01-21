@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
 import static fred.util.Assert.assertReactive;
 
@@ -207,6 +208,47 @@ public class FunctionalReactivesTest {
                 .hasFired(ImmutableList.of(1, 2),
                         ImmutableList.of(3, 4)
                 );
+
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testBufferByTimeWithTheSyncEventManagerWillThrowException() throws Exception {
+        subject.bufferByTime(0, 1, TimeUnit.SECONDS);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testBufferByTimeWithDelayLongerThanTestShouldFireNothing() throws Exception {
+        assertReactive(
+                FunctionalReactives.fromAsync(1, 2, 3, 4, 5)
+                        .bufferByTime(1000, 1, TimeUnit.MILLISECONDS)
+        ).hasFired();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testBufferByTimeWithZeroInitialDelayShouldBeFastEnoughToFireSomething() throws Exception {
+        assertReactive(
+                FunctionalReactives.fromAsync(1, 2, 3, 4, 5)
+                        .bufferByTime(0, 1000, TimeUnit.MILLISECONDS)
+        ).hasFired(ImmutableList.of(1, 2, 3, 4, 5));
+
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testBufferByFlushSource() throws Exception {
+        FunctionalReactives<Integer> fireOnlyOddNumber =
+                subject.filter(new Predicate<Integer>() {
+                    @Override
+                    public boolean apply(Integer input) {
+                        return input % 2 == 1;
+                    }
+                });
+
+        assertReactive(
+                subject.bufferByFlush(fireOnlyOddNumber)
+        ).hasFired(ImmutableList.of(1), ImmutableList.of(2, 3), ImmutableList.of(4, 5));
 
     }
 }

@@ -31,6 +31,13 @@ public class ReactFuncBuffer<T> extends ReactFuncIgnoreHost<List<T>> {
     }
 
     /**
+     * Only flush when flush souce reacted regardless of buffer size (Integer.MAX_VALUE maximum)
+     */
+    public ReactFuncBuffer(EventManager em, EventReact<T> source, Event flushSource) {
+        this(em, source, new EventReactConstant<Integer>(Integer.MAX_VALUE), flushSource);
+    }
+
+    /**
      * Flush either buffer exceed or flush source fired.
      */
     public ReactFuncBuffer(EventManager em, EventReact<T> source, EventReact<Integer> bufferSize, Event flushSource) {
