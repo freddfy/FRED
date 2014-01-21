@@ -1,5 +1,6 @@
 package fred.frp;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import fred.event.Event;
 import fred.event.EventManager;
@@ -53,7 +54,7 @@ public class ReactFuncBufferTest {
         when(em.isFired(source)).thenReturn(true).thenReturn(false).thenReturn(true);
 
         assertThat(subject.apply()).contains(ImmutableList.of("1"));
-        assertThat(subject.apply()).contains(ImmutableList.of());
+        assertThat(subject.apply()).isAbsent(); //will not flush if there's no item in buffer
         assertThat(subject.apply()).contains(ImmutableList.of("2"));
     }
 
@@ -67,5 +68,17 @@ public class ReactFuncBufferTest {
         assertThat(subject.apply()).isAbsent();
         assertThat(subject.apply()).contains(ImmutableList.of("1", "2")); //2 > limit 1 so flushed 2
         assertThat(subject.apply()).contains(ImmutableList.of("3"));
+    }
+
+    @Test
+    public void testIfSizeIsAbsentItWillAlwaysFlushAsIfSizeIsOne() throws Exception {
+        when(em.isFired(flush)).thenReturn(false);
+        when(size.value()).thenReturn(Optional.<Integer>absent());
+        when(source.value()).thenReturn(of("1")).thenReturn(of("2"));
+        when(em.isFired(source)).thenReturn(true).thenReturn(false).thenReturn(true);
+
+        assertThat(subject.apply()).contains(ImmutableList.of("1"));
+        assertThat(subject.apply()).isAbsent(); //will not flush if there's no item in buffer
+        assertThat(subject.apply()).contains(ImmutableList.of("2"));
     }
 }

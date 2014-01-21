@@ -63,7 +63,10 @@ public class ReactFuncBuffer<T> extends ReactFuncIgnoreHost<List<T>> {
 
     private Optional<List<T>> flushBuffer() {
         try {
-            return Optional.<List<T>>of(ImmutableList.copyOf(buffer));
+            if (!buffer.isEmpty()) {
+                return Optional.<List<T>>of(ImmutableList.copyOf(buffer));
+            }
+            return Optional.absent();
         } finally{
             buffer.clear();
         }
