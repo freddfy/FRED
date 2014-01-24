@@ -11,4 +11,4 @@ Would not it be even nicer if we could handle a stream of callbacks like a [Stre
 
 Example Usage
 ====
-[FunctionalReactives](https://github.com/freddfy/FRED/blob/master/src/test/java/fred/example/FunctionalReactiveExamples.java) is what you got to write easy Java codes in a Functional Reactive style.
+[FunctionalReactives](https://github.com/freddfy/FRED/blob/master/src/main/java/fred/FunctionalReactives.java) is what you got to [write easy Java codes in a Functional Reactive style](https://github.com/freddfy/FRED/blob/master/src/test/java/fred/example/FunctionalReactiveExamples.java).
