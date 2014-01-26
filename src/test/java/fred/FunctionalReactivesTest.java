@@ -251,4 +251,37 @@ public class FunctionalReactivesTest {
         ).hasFired(ImmutableList.of(1), ImmutableList.of(2, 3), ImmutableList.of(4, 5));
 
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testSlideBySize() throws Exception {
+
+        assertReactive(
+                subject.slideBySize(3)
+        ).hasFired(
+                ImmutableList.of(1),
+                ImmutableList.of(1, 2),
+                ImmutableList.of(1, 2, 3),
+                ImmutableList.of(2, 3, 4),
+                ImmutableList.of(3, 4, 5)
+        );
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testAsyncSourceSlideByTime() throws Exception {
+        assertReactive(
+                FunctionalReactives.fromAsync(1, 2, 3)
+                        .slideByTime(2, TimeUnit.MILLISECONDS)  //1st ms: [1,2,3]; 2nd ms: []
+        ).waitFor(10)
+        .hasFired(
+                ImmutableList.of(1, 2, 3), //first ms buffer
+                ImmutableList.of(1, 2, 3)  //first ms buffer + empty 2nd second buffer
+        );
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testSlideByTimeInTheSameThreadWillThrowUnsupportedException() throws Exception {
+        subject.slideByTime(1, TimeUnit.SECONDS);
+    }
 }

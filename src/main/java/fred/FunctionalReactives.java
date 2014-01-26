@@ -190,6 +190,26 @@ public class FunctionalReactives<T> implements LifeCycle {
         return em instanceof EventManagerSync || em instanceof EventManagerCore;
     }
 
+    /**
+     * A sliding buffer with a window by size, e.g. in case of a stream of integer
+     * 1, 2, 3, 4, 5 slide by size of 2
+     * then fire sequence will be:
+     * [1], [1,2], [2,3], [3,4], [4,5]
+     *
+     */
+    public FunctionalReactives<List<T>> slideBySize(int slideSize) {
+        return chain(new ReactFuncSlide<T>(currReact, slideSize));
+    }
+
+    /**
+     * A time-based sliding buffer, similar to slideBySize except the sliding window is by period of time unit
+     * On each time unit the sliding window will move forward by one.
+     */
+    public FunctionalReactives<List<T>> slideByTime(int period, TimeUnit timeUnit) {
+        FunctionalReactives<?> slideSource = timerSource(1, 1, timeUnit);
+        return chain(slideSource, new ReactFuncSlide<T>(currReact, period, em, slideSource.currReact));
+    }
+
     @Override
     public void start() {
         em.start();

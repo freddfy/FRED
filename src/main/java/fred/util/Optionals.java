@@ -3,13 +3,14 @@ package fred.util;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import fred.frp.Function2;
 import fred.frp.FunctionAcc;
 import fred.frp.FunctionVoid;
 
 /**
  * Some monad like helper for filtering out absent values, like the way in Scala.
- *
+ * <p/>
  * Author:  Fred Deng
  */
 public class Optionals {
@@ -23,21 +24,41 @@ public class Optionals {
     }
 
     public static <T> Optional<Void> filterAbsentVoid(Optional<T> source, FunctionVoid<? super T> functionVoid) {
-        if(source.isPresent()){
+        if (source.isPresent()) {
             functionVoid.apply(source.get());
         }
 
         return Optional.absent();
     }
 
-    public static <F, T> Optional<T> filterAbsent(Optional<T> acc, Optional<F> next, FunctionAcc<? super F, T> function ){
+    public static <F, T> Optional<T> filterAbsent(Optional<T> acc, Optional<F> next, FunctionAcc<? super F, T> function) {
         return acc.isPresent() && next.isPresent() ? function.apply(acc.get(), next.get()) : Optional.<T>absent();
     }
 
     public static <F1, F2, T> Optional<T> filterAbsent(Optional<F1> input1,
                                                        Optional<F2> input2,
-                                                       Function2<? super F1, ? super F2, T> function){
+                                                       Function2<? super F1, ? super F2, T> function) {
         return input1.isPresent() && input2.isPresent() ? function.apply(input1.get(), input2.get()) : Optional.<T>absent();
+    }
+
+    public static <T> Iterable<T> filterAbsent(Iterable<Optional<T>> input) {
+        return Iterables.transform(Iterables.filter(input, getPredicate()),
+                new Function<Optional<T>, T>() {
+                    @Override
+                    public T apply(Optional<T> input) {
+                        return input.get();
+                    }
+                }
+        );
+    }
+
+    private static <T> Predicate<Optional<? extends T>> getPredicate() {
+        return new Predicate<Optional<? extends T>>() {
+            @Override
+            public boolean apply(Optional<? extends T> input) {
+                return input.isPresent();
+            }
+        };
     }
 
 }

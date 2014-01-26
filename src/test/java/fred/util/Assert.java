@@ -1,5 +1,6 @@
 package fred.util;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import fred.FunctionalReactives;
 import fred.frp.FunctionVoid;
@@ -16,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class Assert<T> implements FunctionVoid<T> {
     private final FunctionalReactives<T> verifiable;
     private final List<T> results = Lists.newCopyOnWriteArrayList();
+    private long timeInMs = 0;
 
     public static <T> Assert<T> assertReactive(FunctionalReactives<T> verifiable){
         return new Assert<T>(verifiable);
@@ -33,8 +35,19 @@ public class Assert<T> implements FunctionVoid<T> {
     public void hasFired(T... expResult) {
         verifiable.forEach(this).start();
 
+        try {
+            Thread.sleep(timeInMs);
+        } catch (InterruptedException e) {
+            Throwables.propagate(e);
+        }
+
         verifiable.shutdown();
 
         assertThat(results).containsExactly(expResult);
+    }
+
+    public Assert waitFor(int ms) {
+        timeInMs = ms;
+        return this;
     }
 }
