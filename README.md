@@ -5,10 +5,8 @@ Functional Reactive Event Driver - a lightweight Java library aims to facilitate
 
 Functional Reactives
 ====
-Would not it be nice if we could construct not only a one-time [Future](http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Future.html) but a series of callbacks? - So it comes [Reactive](http://en.wikipedia.org/wiki/Reactive_programming).
-
-Would not it be even nicer if we could handle a stream of callbacks like a [Stream](http://download.java.net/jdk8/docs/api/java/util/stream/package-summary.html) that allows for Functional-style operations? - And then it comes [Functional Reactive](http://en.wikipedia.org/wiki/Functional_reactive_programming).
+Java 8 comes with [CompletableFuture](http://download.java.net/lambda/b88/docs/api/java/util/concurrent/CompletableFuture.html) and [Stream](http://download.java.net/jdk8/docs/api/java/util/stream/Stream.html), which is great. But would it not be even nicer if we could have something that combines both, like the way in [Functional Reactive Programming](http://en.wikipedia.org/wiki/Functional_reactive_programming) which allows write functional style operations on one or more async streams.
 
 Example Usage
 ====
-[FunctionalReactives](https://github.com/freddfy/FRED/blob/master/src/main/java/fred/FunctionalReactives.java) is what you got to [write easy Java codes in a Functional Reactive style](https://github.com/freddfy/FRED/blob/master/src/test/java/fred/example/FunctionalReactiveExamples.java).
+[FunctionalReactives](https://github.com/freddfy/FRED/blob/master/src/main/java/fred/FunctionalReactives.java) is your friend to write [simple Java codes in a Functional Reactive style](https://github.com/freddfy/FRED/blob/master/src/test/java/fred/example/FunctionalReactiveExamples.java).
