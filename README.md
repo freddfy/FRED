@@ -9,4 +9,4 @@ Java 8 comes with [CompletableFuture](http://download.java.net/lambda/b88/docs/a
 
 Example Usage
 ====
-[FunctionalReactives](https://github.com/freddfy/FRED/blob/master/src/main/java/fred/FunctionalReactives.java) is your friend to write [simple Java codes in a Functional Reactive style](https://github.com/freddfy/FRED/blob/master/src/test/java/fred/example/FunctionalReactiveExamples.java).
+[FunctionalReactives](https://github.com/freddfy/FRED/blob/master/src/main/java/fred/FunctionalReactives.java) is your friend to write [simple Java codes in a Functional Reactive style](https://github.com/freddfy/FRED/blob/master/src/test/java/fred/example/FunctionalReactiveExamples.java). (and it's on Java 6!)
