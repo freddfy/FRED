@@ -6,6 +6,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import fred.FunctionalReactives;
 import fred.event.Schedulable;
+import fred.frp.Function2;
 import fred.frp.FunctionAcc;
 import fred.sub.Subscribable;
 import org.junit.Test;
@@ -67,17 +68,17 @@ public class FunctionalReactiveExamples {
      */
     @Test
     public void testEventSourcingFromAsynchronousSubscribable() throws Exception {
-        FunctionalReactives fr =
+        FunctionalReactives<Void> fr =
                 FunctionalReactives.createAsync( //assume source happens in a different thread
-                    aSubscribableWillScheduleIntegerOneToFive() //a subscribable implementation
+                        aSubscribableWillAsyncFireIntegerOneToFive() //a subscribable implementation
                 )
-                .filter(new Predicate<Integer>() {
-                    @Override
-                    public boolean apply(Integer input) {
-                        return input % 2 == 0;  //filter out odd integers
-                    }
-                })
-                .forEach(println()); //print out reaction results each in a line
+                        .filter(new Predicate<Integer>() {
+                            @Override
+                            public boolean apply(Integer input) {
+                                return input % 2 == 0;  //filter out odd integers
+                            }
+                        })
+                        .forEach(println()); //print out reaction results each in a line
 
         fr.start();     //will trigger Subscribable.doSubscribe()
         fr.shutdown();  //will trigger Subscribable.unsubscribe() which in above case will await for all the integers scheduled
@@ -89,7 +90,7 @@ public class FunctionalReactiveExamples {
 
     }
 
-    private Subscribable<Integer> aSubscribableWillScheduleIntegerOneToFive() {
+    private Subscribable<Integer> aSubscribableWillAsyncFireIntegerOneToFive() {
         //For more complex sourcing, a Subscribable needs to be implemented
         //The example subscribable here is only a simple one that will
         //schedule 1 ~ 5 to the reactives
@@ -119,5 +120,40 @@ public class FunctionalReactiveExamples {
                 }
             }
         };
+    }
+
+    /**
+     * This example demonstrate summing up two streams of integers which are coming from
+     * two another threads. As a result, the sum of two stream ov corresponding integers
+     * are printed out.
+     */
+    @Test
+    public void testSummingUpTwoAsyncStreamsOfIntegers() throws Exception {
+        FunctionalReactives<Integer> fr1 =
+                FunctionalReactives.createAsync(
+                        aSubscribableWillAsyncFireIntegerOneToFive()  //one async stream of Integers
+                );
+        FunctionalReactives<Integer> fr2 =
+                fr1.fromAnother(
+                        aSubscribableWillAsyncFireIntegerOneToFive()  //another async stream of Integers
+                );
+
+        FunctionalReactives<Void> fr =
+                fr1.zipStrict(fr2, new Function2<Integer, Integer, Integer>() {
+                    @Override
+                    public Optional<Integer> apply(Integer input1, Integer input2) {
+                        return Optional.of(input1 + input2);
+                    }
+                })
+                .forEach(println()); //print out reaction results each in a line
+
+        fr.start();     //will trigger Subscribable.doSubscribe()
+        fr.shutdown();  //will trigger Subscribable.unsubscribe() which in above case will await for all the integers scheduled
+
+        //Reaction walk through:
+        // Source1:                     1 -> 2 -> 3 -> 4 -> 5 -> |
+        // Source2:                     1 -> 2 -> 3 -> 4 -> 5 -> |
+        // Print sum of two sources:    2 -> 4 -> 6 -> 8 -> 10 ->|
+
     }
 }

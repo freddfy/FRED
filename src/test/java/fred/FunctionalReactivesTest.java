@@ -129,7 +129,7 @@ public class FunctionalReactivesTest {
     public void testZipEitherWithTheSameEventManagerFromDifferentSources() throws Exception {
 
         FunctionalReactives<Integer> fr1 = FunctionalReactives.from(4, 5);  //4 is ignored since it is sync event manager
-        FunctionalReactives<Integer> fr2 = fr1.from(new SubscribableIterable<Integer>(5, 3, 2, 1));
+        FunctionalReactives<Integer> fr2 = fr1.fromAnother(new SubscribableIterable<Integer>(5, 3, 2, 1));
 
         assertReactive(
                 fr1.zipEither(fr2, new Function2<Integer, Integer, String>() {
@@ -167,7 +167,7 @@ public class FunctionalReactivesTest {
     public void testZipStrictWithTheSameEventManagerFromDifferentSources() throws Exception {
 
         FunctionalReactives<Integer> fr1 = FunctionalReactives.from(4, 5);
-        FunctionalReactives<Integer> fr2 = fr1.from(new SubscribableIterable<Integer>(5, 3, 2, 1));
+        FunctionalReactives<Integer> fr2 = fr1.fromAnother(new SubscribableIterable<Integer>(5, 3, 2, 1));
 
         assertReactive(
                 fr1.zipStrict(fr2, new Function2<Integer, Integer, String>() {

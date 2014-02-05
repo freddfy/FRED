@@ -91,7 +91,7 @@ public class FunctionalReactives<T> implements LifeCycle {
         this.currReact = currReact;
     }
 
-    public <T1> FunctionalReactives<T1> from(Subscribable<? extends T1> subscribable) {
+    public <T1> FunctionalReactives<T1> fromAnother(Subscribable<? extends T1> subscribable) {
         return new FunctionalReactives<T1>(em, subscribable);
     }
 
@@ -165,7 +165,7 @@ public class FunctionalReactives<T> implements LifeCycle {
             throw new UnsupportedOperationException("Timer source not thread safe with sync event manager");
         }
 
-        return from(new SubscribableTimer(delay, period, timeUnit));
+        return fromAnother(new SubscribableTimer(delay, period, timeUnit));
     }
 
     /**
