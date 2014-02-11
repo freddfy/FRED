@@ -6,6 +6,7 @@ import com.google.common.base.Predicate;
 import fred.event.*;
 import fred.frp.*;
 import fred.sub.Subscribable;
+import fred.sub.SubscribableEventManagerBridge;
 import fred.sub.SubscribableIterable;
 import fred.sub.SubscribableTimer;
 
@@ -136,8 +137,8 @@ public class FunctionalReactives<T> implements LifeCycle {
      * was fired.
      */
     public <T0, T1> FunctionalReactives<T1> zipEither(FunctionalReactives<T0> another, Function2<? super T, ? super T0, T1> function) {
-        if (another.em != this.em) { //TODO: to support different event manager
-            throw new UnsupportedOperationException("Not yet support zipping from different event manager");
+        if (another.em != this.em) {
+            another = fromAnother(new SubscribableEventManagerBridge<T0>(another));
         }
         return chain(another, new ReactFuncZipEither<T, T0, T1>(currReact, another.currReact, function));
     }
@@ -147,8 +148,8 @@ public class FunctionalReactives<T> implements LifeCycle {
      * which is like "zipping strictly" two stream of inputs.
      */
     public <T0, T1> FunctionalReactives<T1> zipStrict(FunctionalReactives<T0> another, Function2<? super T, ? super T0, T1> function) {
-        if (another.em != this.em) { //TODO: to support different event manager
-            throw new UnsupportedOperationException("Not yet support zipping from different event manager");
+        if (another.em != this.em) {
+            another = fromAnother(new SubscribableEventManagerBridge<T0>(another));
         }
         return chain(another, new ReactFuncZipStrict<T, T0, T1>(currReact, another.currReact, function, em));
     }
@@ -220,4 +221,7 @@ public class FunctionalReactives<T> implements LifeCycle {
         em.shutdown();
     }
 
+    public void detach() {
+        em.disconnect(currReact);
+    }
 }

@@ -164,6 +164,22 @@ public class FunctionalReactivesTest {
     }
 
     @Test
+    public void testZipEitherWithDifferentEventManagersFromDifferentSources() throws Exception {
+        FunctionalReactives<Integer> fr1 = FunctionalReactives.from(4, 5);  //4 is ignored since it is sync event manager
+        FunctionalReactives<Integer> fr2 = FunctionalReactives.from(5, 3, 2, 1);
+
+        assertReactive(
+                fr1.zipEither(fr2, new Function2<Integer, Integer, String>() {
+                    @Override
+                    public Optional<String> apply(Integer input1, Integer input2) {
+                        return Optional.of(input1.toString() + input2.toString());
+                    }
+                })
+        ).hasFired("55", "53", "52", "51");
+
+    }
+
+    @Test
     public void testZipStrictWithTheSameEventManagerFromDifferentSources() throws Exception {
 
         FunctionalReactives<Integer> fr1 = FunctionalReactives.from(4, 5);
@@ -199,6 +215,22 @@ public class FunctionalReactivesTest {
                 })
         ).hasFired("55", "43", "31");
 
+    }
+
+    @Test
+    public void testZipStrictWithDifferentEventManagerFromDifferentSources() throws Exception {
+
+        FunctionalReactives<Integer> fr1 = FunctionalReactives.from(4, 5);
+        FunctionalReactives<Integer> fr2 = FunctionalReactives.from(5, 3, 2, 1);
+
+        assertReactive(
+                fr1.zipStrict(fr2, new Function2<Integer, Integer, String>() {
+                    @Override
+                    public Optional<String> apply(Integer input1, Integer input2) {
+                        return Optional.of(input1.toString() + input2.toString());
+                    }
+                })
+        ).hasFired("45", "53");
     }
 
     @Test
